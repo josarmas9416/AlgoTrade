@@ -84,9 +84,4 @@ elif len(positions)>0:
 
 # shut down connection to the MetaTrader 5 terminal
 mt5.shutdown()
-
-
-
-
-# def close_positions_by_id(position):
     

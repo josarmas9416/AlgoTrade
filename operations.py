@@ -1,4 +1,3 @@
-import pandas as pd
 import MetaTrader5 as mt5
 
 account = 67079242
@@ -12,22 +11,20 @@ print("MetaTrader5 package version: ",mt5.__version__)
  
 # establish MetaTrader 5 connection to a specified trading account
 if not mt5.initialize(path=path, login=account, server=server,password=password, timeout=10000):
-    print("initialize() failed, error code =",mt5.last_error())
+    print("initialize() failed, error code =", mt5.last_error())
     quit()
 
 # prepare the buy request structure
 symbol = "EURUSD"
 symbol_info = mt5.symbol_info(symbol)
-if symbol_info is None:
+if not symbol_info:
     print(symbol, "not found, can not call order_check()")
     mt5.shutdown()
     quit()
 
 lot = 0.1
 point = mt5.symbol_info(symbol).point
-print('Symbol point: ', point)
 price = mt5.symbol_info_tick(symbol).ask
-print('Symbol point: ', price)
 deviation = 20
 request = {
     "action": mt5.TRADE_ACTION_DEAL,
@@ -48,7 +45,7 @@ request = {
 result = mt5.order_send(request)
 
 # check the execution result
-print("1. order_send(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation));
+print("1. order_send(): by {} {} lots at {} with deviation={} points".format(symbol,lot,price,deviation))
 if result.retcode != mt5.TRADE_RETCODE_DONE:
     print("2. order_send failed, retcode={}".format(result.retcode))
     # request the result as a dictionary and display it element by element
