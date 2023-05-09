@@ -1,25 +1,27 @@
 import mt5 as server
 import MetaTrader5 as mt5
-import time
 import traceback
 
 def calculatePivotPoints(high, low, close):
     pivot = (high + low + close) / 3
-    r1 = 2 * pivot - low
-    s1 = 2 * pivot - high
-    r2 = pivot + (high - low)
-    s2 = pivot - (high - low)
-    r3 = high + 2 * (pivot - low)
-    s3 = low - 2 * (high - pivot)
-    return (pivot, r1, r2, r3, s1, s2, s3)
+    firstRessistance = 2 * pivot - low
+    firstSupport = 2 * pivot - high
+    secondRessistance = pivot + (high - low)
+    secondSupport = pivot - (high - low)
+    thirdRessistance = high + 2 * (pivot - low)
+    thirdSupport = low - 2 * (high - pivot)
+
+    mean = (high + low ) / 2
+    return (pivot[-1], firstRessistance[-1], secondRessistance[-1], thirdRessistance[-1], firstSupport[-1], secondSupport[-1], thirdSupport[-1], mean[-1])
 
 server.init()
 
 try:
     # select the financial instrument to analyze
-    symbol = "EURUSD"
-    lastData = 1000
+    symbol = ".USTECHCash"
+    lastData = 2
     timeframe = mt5.TIMEFRAME_D1
+    volume = 0.05
 
     # request historical prices
     prices_df = server.getSymbolData(symbol, lastData, timeframe)
@@ -30,16 +32,25 @@ try:
     low = prices_df['low']
     close = prices_df['close']
 
-    pivot, r1, r2, r3, s1, s2, s3 = calculatePivotPoints(high, low, close)
+    pivot, firstRessistance, secondRessistance, thirdRessistance, firstSupport, secondSupport, thirdSupport, mean = calculatePivotPoints(high, low, close)
 
     print("Support and Resistance Levels for", symbol)
-    print("Pivot Point:", pivot[-1])
-    print("Resistance 1:", r1[-1])
-    print("Support 1:", s1[-1])
-    print("Resistance 2:", r2[-1])
-    print("Support 2:", s2[-1])
-    print("Resistance 3:", r3[-1])
-    print("Support 3:", s3[-1])
+    print("Pivot Point:", pivot)
+    print("Resistance 1:", firstRessistance)
+    print("Support 1:", firstSupport)
+    print("Resistance 2:", secondRessistance)
+    print("Support 2:", secondSupport)
+    print("Resistance 3:", thirdRessistance)
+    print("Support 3:", thirdSupport)
+    print("Mean:", mean)
+
+    # Mean Reversal
+    pendingOrderBuy = server.sendOperation(mt5.TRADE_ACTION_PENDING, symbol, volume, secondSupport, mean, mt5.ORDER_TYPE_BUY_LIMIT, price = firstSupport)
+    pendingOrderSell = server.sendOperation(mt5.TRADE_ACTION_PENDING, symbol, volume, secondRessistance, mean, mt5.ORDER_TYPE_SELL_LIMIT, price = firstRessistance)
+
+    # BreakThrough
+    pendingOrderBuyB = server.sendOperation(mt5.TRADE_ACTION_PENDING, symbol, volume, firstRessistance, thirdRessistance, mt5.ORDER_TYPE_BUY_STOP, price = secondRessistance)
+    pendingOrderSellB = server.sendOperation(mt5.TRADE_ACTION_PENDING, symbol, volume, firstSupport, thirdSupport, mt5.ORDER_TYPE_SELL_STOP, price = secondSupport)
 
 except Exception as e:
     print('Unexpected error {}'.format(e))

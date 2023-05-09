@@ -36,7 +36,7 @@ def close_all_positions(positions):
         result = mt5.order_send(request)
 
         if not result:
-            print("order_send() failed, error code =",mt5.last_error())
+            print("order_send() failed, error code = ", mt5.last_error())
             quit()
 
         # check the result of the order_send function

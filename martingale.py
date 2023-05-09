@@ -21,9 +21,9 @@ try:
             operationsLenght = len(operationsDf)
         if operationsLenght == 0:
             if lastPrice > referenceLine + variation:
-                server.sendOperation(symbol, volume, mt5.ORDER_TYPE_SELL, mt5.symbol_info_tick(symbol).bid + variation, referenceLine)
+                server.sendOperation(mt5.TRADE_ACTION_DEAL, symbol, volume, mt5.ORDER_TYPE_SELL, mt5.symbol_info_tick(symbol).bid + variation, referenceLine)
             elif lastPrice < referenceLine - variation:
-                server.sendOperation(symbol, volume, mt5.ORDER_TYPE_BUY, mt5.symbol_info_tick(symbol).ask - variation, referenceLine)
+                server.sendOperation(mt5.TRADE_ACTION_DEAL, symbol, volume, mt5.ORDER_TYPE_BUY, mt5.symbol_info_tick(symbol).ask - variation, referenceLine)
             else:
                 print('No conditions were met, last price: {}, reference line: {}, variation: {}'.format(lastPrice, referenceLine, variation))
 
@@ -34,9 +34,9 @@ try:
                 newVolume = operationsDf['volume'].iloc[-1] * 2
                 # 0 is purchase, 1 is sell
                 if lastOpType == 1:
-                    server.sendOperation(symbol, newVolume, mt5.ORDER_TYPE_SELL, mt5.symbol_info_tick(symbol).bid + variation, referenceLine)
+                    server.sendOperation(mt5.TRADE_ACTION_DEAL, symbol, newVolume, mt5.ORDER_TYPE_SELL, mt5.symbol_info_tick(symbol).bid + variation, referenceLine)
                 else:
-                    server.sendOperation(symbol, newVolume, mt5.ORDER_TYPE_BUY, mt5.symbol_info_tick(symbol).ask - variation, referenceLine)
+                    server.sendOperation(mt5.TRADE_ACTION_DEAL, symbol, newVolume, mt5.ORDER_TYPE_BUY, mt5.symbol_info_tick(symbol).ask - variation, referenceLine)
             else:
                 print('No conditions were met, Profit: {}'.format(profit))
         time.sleep(30)
